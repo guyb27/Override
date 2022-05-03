@@ -1,0 +1,8 @@
+A la ligne *main+83 nous voyons que scanf prend comme premier argument %d et l'adresse 0xffffd72c en deuxieme argument [$esp+0x1c] dans lequel il va stocker le resultat sous forme d un int.
+
+A la ligne *main+83 nous voyons la comparaison du resultat de scanf avec 0x149c.
+
+Pour resoudre ce challenge, nous avons besoins de convertir 0x149c en decimal et de le rentrer dans l input de scanf.
+
+(gdb) p/d 0x149c
+$2 = 5276
