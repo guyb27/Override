@@ -25,7 +25,7 @@ int main()
             			puts("child is exiting...");
          	   		return 0;
         		}
-			ret_ptrace = ptrace(PTRACE_PEEKUSER, ret_fork, 44, 0);//Retourn 0xb si on utilise la fonction une fonction exec()
+			ret_ptrace = ptrace(PTRACE_PEEKUSER, ret_fork, 44, 0);//Retourn 0xb si on utilise une fonction exec() dans un shellcode
 		}
 	}
 	puts("no exec() for you");
