@@ -48,7 +48,7 @@ Non-debugging symbols:
 Nous pouvons voir sur ce document, que les valeurs des int pris en compte par printf ont une limite :
 https://cs155.stanford.edu/papers/formatstring-1.2.pdf
 
-Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin d ecraser les deux premier octets, puis les deux derniers
+Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite.
 
 => 0x08048475 <+49>:    call   0x8048350 <fgets@plt> ; Size == 100
 (gdb) x/wx $esp
