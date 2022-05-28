@@ -1,7 +1,11 @@
-En analysant le binaire nous nous rendons compte que c'est un binaire 64bits avec la commande file:
+# level02
 
+By looking at the code and with `file` command, we can see that the program is for x64 architecture:
+
+```bash
 level02@OverRide:~$ file level02 
 level02: setuid setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xf639d5c443e6ff1c50a0f8393461c0befc329e71, not stripped
+```
 
 Description simplifier:
 
