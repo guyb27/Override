@@ -1,18 +1,23 @@
-int main()
-{
-	//0xffffd0f0->0xffffd060
-	char s[24];
-	char str[120];
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-	fgets(str, 100, 0);
-	for (int i = 0;i < strlen(str);i++)
-	{
-		for (int j = 0;j < strlen(str);j++)
-		{
-			if (str[j] >= 'A' && str[j] <= 'Z')//>= 0x41 && <= 0x5a
-				str[j] -= 32;
+int main() {
+	int i;
+	char buf_1[112];
+
+	fgets(buf_1, 100, stdin);
+	i = 0;
+	while (1) {
+		if (i >= strlen(buf_1)) {
+			break;
+		}
+
+		if (buf_1[i] >= 'A' && buf_1[i <= 'Z']) {
+			buf_1[i] ^= 32;
 		}
 	}
-	printf(str);
+
+	printf(buf_1);
 	exit(0);
 }
