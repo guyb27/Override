@@ -1,3 +1,6 @@
+# level03
+
+
 Dans ce challenge, il y a des protections sur le binaire:
 
 RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE
@@ -32,6 +35,9 @@ $36 = 0x12
 gdb-peda$ p/d 322424845-322424827
 $37 = 18
 
+        01010001 = Q
+XOR     00010010 = 18
+    =   01000011 = C
 Nous devons donc mettre "322424827" dans l'input
 
 level03@OverRide:~$ (python -c 'print "322424827"';cat) | ./level03 

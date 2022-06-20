@@ -1,6 +1,9 @@
-void decrypt(int res)
-{
-	char encrypted="Q}|u`sfg~sf{}|a3";
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+void decrypt(int res) {
+	char encrypted[16] = "Q}|u`sfg~sf{}|a3";
 
 	for (int i = 0; encrypted[i]; i++)
 		encrypted[i] ^= res;
@@ -8,23 +11,30 @@ void decrypt(int res)
 		system("/bin/sh");
 }
 
-void 	test(int my_input, int v2)
-{
-	int res = my_input-v2;
-	if ( res  > 0 && res <= 21)
-		return decrypt(res);
-	return decrypt(rand());	
+void	test(int buf_1, int n) {
+	int res = n - buf_1;
+
+	if (res > 0 && res <= 21) {
+		decrypt(res);
+	} else {
+		decrypt(rand());
+	}
+
+	return;	
 }
 
-int main()
-{
-	int my_input;
+int main(void) {
+	int buf_1;
 
 	srand(time(0));
-	puts('*' <repeats 35 times>);
-	puts("*\t\tlevel03\t\t**");
-	puts('*' <repeats 35 times>);
+
+	puts("***********************************");
+	puts("*               level03         **");
+	puts("***********************************");
+
 	printf("Password:");
-	scanf(%d, &my_input);
-	test(my_input, 22424845);
+	scanf("%d", &buf_1);
+	test(buf_1, 322424845);
+
+	return(0);
 }
