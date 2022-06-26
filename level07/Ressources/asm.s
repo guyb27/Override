@@ -48,7 +48,7 @@ main:
    0x080487ea <+199>:   mov    eax,DWORD PTR [esp+0x1c]
    0x080487ee <+203>:   mov    eax,DWORD PTR [eax]
    0x080487f0 <+205>:   test   eax,eax
-   0x080487f2 <+207>:   jne    0x80487a7 <main+132>
+   0x080487f2 <+207>:   jne    0x80487a7 <main+132>   ; while()
    0x080487f4 <+209>:   jmp    0x8048839 <main+278>
    0x080487f6 <+211>:   mov    eax,DWORD PTR [esp+0x18]
    0x080487fa <+215>:   mov    eax,DWORD PTR [eax]
@@ -73,17 +73,17 @@ main:
    0x0804883f <+284>:   test   eax,eax
    0x08048841 <+286>:   jne    0x80487f6 <main+211>
    0x08048843 <+288>:   mov    DWORD PTR [esp],0x8048b38
-   0x0804884a <+295>:   call   0x80484c0 <puts@plt>
+   0x0804884a <+295>:   call   0x80484c0 <puts@plt>   ; "Welcome..."
    0x0804884f <+300>:   mov    eax,0x8048d4b
    0x08048854 <+305>:   mov    DWORD PTR [esp],eax
-   0x08048857 <+308>:   call   0x8048470 <printf@plt>
+   0x08048857 <+308>:   call   0x8048470 <printf@plt> ; printf("Input command: ");
    0x0804885c <+313>:   mov    DWORD PTR [esp+0x1b4],0x1
    0x08048867 <+324>:   mov    eax,ds:0x804a040
    0x0804886c <+329>:   mov    DWORD PTR [esp+0x8],eax
    0x08048870 <+333>:   mov    DWORD PTR [esp+0x4],0x14
    0x08048878 <+341>:   lea    eax,[esp+0x1b8]
    0x0804887f <+348>:   mov    DWORD PTR [esp],eax
-   0x08048882 <+351>:   call   0x80484a0 <fgets@plt>
+   0x08048882 <+351>:   call   0x80484a0 <fgets@plt>  ; fgets(i_5, 20, stdin)
    0x08048887 <+356>:   lea    eax,[esp+0x1b8]
    0x0804888e <+363>:   mov    DWORD PTR [esp+0x14],0xffffffff
    0x08048896 <+371>:   mov    edx,eax
@@ -95,14 +95,14 @@ main:
    0x080488a7 <+388>:   not    eax
    0x080488a9 <+390>:   sub    eax,0x1
    0x080488ac <+393>:   sub    eax,0x1
-   0x080488af <+396>:   mov    BYTE PTR [esp+eax*1+0x1b8],0x0
+   0x080488af <+396>:   mov    BYTE PTR [esp+eax*1+0x1b8],0x0  ; i_5[strlen(i_5)] = 0
    0x080488b7 <+404>:   lea    eax,[esp+0x1b8]
    0x080488be <+411>:   mov    edx,eax
    0x080488c0 <+413>:   mov    eax,0x8048d5b
    0x080488c5 <+418>:   mov    ecx,0x5
    0x080488ca <+423>:   mov    esi,edx
    0x080488cc <+425>:   mov    edi,eax
-   0x080488ce <+427>:   repz cmps BYTE PTR ds:[esi],BYTE PTR es:[edi]
+   0x080488ce <+427>:   repz cmps BYTE PTR ds:[esi],BYTE PTR es:[edi] ; if i_5 == "store"
    0x080488d0 <+429>:   seta   dl
    0x080488d3 <+432>:   setb   al
    0x080488d6 <+435>:   mov    ecx,edx
@@ -133,7 +133,7 @@ main:
    0x08048922 <+511>:   jne    0x8048939 <main+534>
    0x08048924 <+513>:   lea    eax,[esp+0x24]
    0x08048928 <+517>:   mov    DWORD PTR [esp],eax
-   0x0804892b <+520>:   call   0x80486d7 <read_number>
+   0x0804892b <+520>:   call   0x80486d7 <read_number>   ; if i_5 == "read"
    0x08048930 <+525>:   mov    DWORD PTR [esp+0x1b4],eax
    0x08048937 <+532>:   jmp    0x8048965 <main+578>
    0x08048939 <+534>:   lea    eax,[esp+0x1b8]
@@ -150,14 +150,14 @@ main:
    0x0804895c <+569>:   mov    eax,ecx
    0x0804895e <+571>:   movsx  eax,al
    0x08048961 <+574>:   test   eax,eax
-   0x08048963 <+576>:   je     0x80489cf <main+684>
+   0x08048963 <+576>:   je     0x80489cf <main+684>   ; if i_5 == "quit"
    0x08048965 <+578>:   cmp    DWORD PTR [esp+0x1b4],0x0
    0x0804896d <+586>:   je     0x8048989 <main+614>
    0x0804896f <+588>:   mov    eax,0x8048d6b
    0x08048974 <+593>:   lea    edx,[esp+0x1b8]
    0x0804897b <+600>:   mov    DWORD PTR [esp+0x4],edx
    0x0804897f <+604>:   mov    DWORD PTR [esp],eax
-   0x08048982 <+607>:   call   0x8048470 <printf@plt>
+   0x08048982 <+607>:   call   0x8048470 <printf@plt> ; 
    0x08048987 <+612>:   jmp    0x80489a1 <main+638>
    0x08048989 <+614>:   mov    eax,0x8048d88
    0x0804898e <+619>:   lea    edx,[esp+0x1b8]
@@ -232,3 +232,61 @@ store_number:
    0x080486d0 <+160>:   mov    eax,0x0 ; return 0
    0x080486d5 <+165>:   leave  
    0x080486d6 <+166>:   ret 
+
+read_number:
+   0x080486d7 <+0>:     push   ebp
+   0x080486d8 <+1>:     mov    ebp,esp
+   0x080486da <+3>:     sub    esp,0x28
+   0x080486dd <+6>:     mov    DWORD PTR [ebp-0xc],0x0
+   0x080486e4 <+13>:    mov    eax,0x8048add
+   0x080486e9 <+18>:    mov    DWORD PTR [esp],eax
+   0x080486ec <+21>:    call   0x8048470 <printf@plt> ; printf(" Index: ");
+   0x080486f1 <+26>:    call   0x80485e7 <get_unum>   ; get_unum()
+   0x080486f6 <+31>:    mov    DWORD PTR [ebp-0xc],eax
+   0x080486f9 <+34>:    mov    eax,DWORD PTR [ebp-0xc]
+   0x080486fc <+37>:    shl    eax,0x2
+   0x080486ff <+40>:    add    eax,DWORD PTR [ebp+0x8]
+   0x08048702 <+43>:    mov    edx,DWORD PTR [eax]
+   0x08048704 <+45>:    mov    eax,0x8048b1b
+   0x08048709 <+50>:    mov    DWORD PTR [esp+0x8],edx
+   0x0804870d <+54>:    mov    edx,DWORD PTR [ebp-0xc]
+   0x08048710 <+57>:    mov    DWORD PTR [esp+0x4],edx
+   0x08048714 <+61>:    mov    DWORD PTR [esp],eax
+   0x08048717 <+64>:    call   0x8048470 <printf@plt>
+   0x0804871c <+69>:    mov    eax,0x0
+   0x08048721 <+74>:    leave  
+   0x08048722 <+75>:    ret    
+
+get_unum:
+   0x080485e7 <+0>:     push   ebp
+   0x080485e8 <+1>:     mov    ebp,esp
+   0x080485ea <+3>:     sub    esp,0x28   ; alloc 40 bytes
+   0x080485ed <+6>:     mov    DWORD PTR [ebp-0xc],0x0
+   0x080485f4 <+13>:    mov    eax,ds:0x804a060
+   0x080485f9 <+18>:    mov    DWORD PTR [esp],eax
+   0x080485fc <+21>:    call   0x8048480 <fflush@plt> ; fflush(stdout)
+   0x08048601 <+26>:    mov    eax,0x8048ad0
+   0x08048606 <+31>:    lea    edx,[ebp-0xc]
+   0x08048609 <+34>:    mov    DWORD PTR [esp+0x4],edx
+   0x0804860d <+38>:    mov    DWORD PTR [esp],eax
+   0x08048610 <+41>:    call   0x8048500 <__isoc99_scanf@plt>  ; __isoc99_scanf("%u", )
+   0x08048615 <+46>:    call   0x80485c4 <clear_stdin>   ; clear_stdin()
+   0x0804861a <+51>:    mov    eax,DWORD PTR [ebp-0xc]
+   0x0804861d <+54>:    leave  
+   0x0804861e <+55>:    ret
+
+clear_stdin:
+   0x080485c4 <+0>:     push   ebp
+   0x080485c5 <+1>:     mov    ebp,esp
+   0x080485c7 <+3>:     sub    esp,0x18
+   0x080485ca <+6>:     mov    BYTE PTR [ebp-0x9],0x0
+   0x080485ce <+10>:    jmp    0x80485d1 <clear_stdin+13>
+   0x080485d0 <+12>:    nop
+   0x080485d1 <+13>:    call   0x8048490 <getchar@plt>   ; 
+   0x080485d6 <+18>:    mov    BYTE PTR [ebp-0x9],al  ; 
+   0x080485d9 <+21>:    cmp    BYTE PTR [ebp-0x9],0xa ; 
+   0x080485dd <+25>:    je     0x80485e5 <clear_stdin+33>   ; jmp if getchar() == "\n"
+   0x080485df <+27>:    cmp    BYTE PTR [ebp-0x9],0xff   ; 
+   0x080485e3 <+31>:    jne    0x80485d0 <clear_stdin+12>   ; jmp if getchar() != 255
+   0x080485e5 <+33>:    leave  
+   0x080485e6 <+34>:    ret  
