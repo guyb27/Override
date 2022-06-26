@@ -3,6 +3,8 @@ Partial RELRO   No canary found   NX enabled    PIE enabled     No RPATH   No RU
 level09@OverRide:~$ file level09 
 level09: setuid setgid ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xa1a3a49786f29814c5abd4fc6d7a685800a3d454, not stripped
 
+Dans GDB, l'adresse des fonctions n'est pas la bonne tant que le programmne n est pas demarrer.
+
 (gdb) info function secret_backdoor 
 All functions matching regular expression "secret_backdoor":
 Non-debugging symbols:
