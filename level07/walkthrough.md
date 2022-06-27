@@ -128,7 +128,7 @@ Input command: quit
 
 Try with system:
 
-```basg
+```bash
 Input command: store
  Number: 4159090384
  Index: 2147483762

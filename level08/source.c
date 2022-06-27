@@ -1,9 +1,13 @@
+#include <string.h>
+#include <stdio.h>
+
 void log_wrapper(FILE *file, char *str, char *argv)
 {
 	char str2[304];//0x130
+	char *str_cpy;
 	
-	strcpy(str2, str);
-	int res = strlen(av[1]);
+	strcpy(&str_cpy, str);
+	int res = strlen(argv);
 	int calc = 254 - res - 1;//0xfe
 	res = strlen(str2);
 	snprintf(str2 + res, calc, argv);
@@ -11,47 +15,48 @@ void log_wrapper(FILE *file, char *str, char *argv)
 	fprintf(file, "LOG: %s\n", str2);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	int fd;
+	int letter;
+	FILE *file1;
+	FILE *file2;
 	char str[165];//0xb0
 	char letter;
-	void *canari;
 	char str2[8];
+	int64_t canari;
 
-	if (argc != 2)
-	{
-		printf("Usage: %s filename\n",
-			"/home/kali/asm/Override/level08/level08");
-		exit(1);
+	if (argc != 2) {
+		printf("Usage: %s filename\n", *argv);
 	}
-	if (FILE *file1 = fopen("./backups/.log", 'w') == 0x0)
-	{
+
+	if (file1 = fopen("./backups/.log", 'w') == 0) {
 		printf("ERROR: Failed to open %s\n", "./backups/.log");
 		exit(1);
 	}
-	log_wrapper(file, "Starting back up: ", argv[1]);
+
+	log_wrapper(file1, "Starting back up: ", argv[1]);
 	
-	if (FILE *file2 = fopen(argv[1], 'r') == 0x0)
-	{
-		printf("ERROR: Failed to open %s\n", av[1]);
+	if (file2 = fopen(argv[1], 'r') == 0x0) {
+		printf("ERROR: Failed to open %s\n", argv[1]);
 		exit(1);
 	}
-	strlen("./backups/");
-	str = strncat("./backups/", av[1], 0x59);
-	if (int fd = open(str, 0xc1, 0x1b0) == -1)//creer le fichier si il n existe pas, sinon fail
-	{
-		printf("ERROR: Failed to open %s%s\n",
-			"./backups/",
-			"/home/kali/asm/Override/level08/fake_flag");
-		exit(0x4a);
+
+	// create file if can't find
+	if ((fd = open(strncat("./backups/", argv[1], strlen(argv[1])), 193, 432)) == -1) {
+		printf("ERROR: Failed to open %s%s\n", "./backups/", argv[1]);
+		exit(1);
 	}
-	letter = 0x0;
-	while (letter != 0xff)
-	{
+
+	do {
+		letter = fgetc(file2);
 		write(fd, &letter, 1);
-		int letter = fgetc(file2);
-	}
-	log_wrapper(file1, "Finished back up ", av[1]);
+	} while (letter != -1);
+
+	log_wrapper(file1, "Finished back up ", argv[1]);
+
 	fclose(file2);
 	close(fd);
+
+	return (0);
 }
