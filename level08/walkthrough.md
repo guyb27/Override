@@ -13,7 +13,7 @@ level08@OverRide:~$ mkdir -p backups/home/users/level09
 mkdir: cannot create directory `backups/home': Permission denied
 ```
 
-We move in `/tmp` and create the complete patht to avoid any errors:
+We move in `/tmp` and create the complete path to avoid any errors:
 
 ```bash
 level08@OverRide:/tmp$ ~/level08 /home/users/level09/.pass
