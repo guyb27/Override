@@ -1,45 +1,59 @@
+#include <string.h>
+#include <stdio.h>
+
+char save[184];
+
 void secret_backdoor()
 {
 	system(fgets((void*)NULL, 128, 0));
 }
 
-set_msg(char *username)
+void set_msg(char *username)
 {
-	char str[1040];
+	char c_1[1024];	// -1024
+	int64_t i_1;	// -1032
 
-	bzero(str, 128);
+	bzero(c_1, 1024);
+	
 	puts(">: Msg @Unix-Dude");
 	printf(">>: ");
-	fgets(str, 1024, stdin);
-	strncpy(username+140, str, username+180);
+
+	fgets(c_1, 1024, stdin);
+	
+	strncpy(username, c_1, (int)&username[180]);
 }
 
-set_username(char *username)
-{
-	char str[160];//0x7fffffffe4f0=>0x7fffffffe450
+void set_username(char *username)
+{	
+	int i_2;		// -4
+	char c_1[128];	// -144
+	int64_t	i_1;	// -152
 
-	memset(str+16, 64);
+	bzero(c_1, 128);
+
 	puts(">: Enter your username");
 	printf(">>: ");
-	//rdi == 0x7fffffffe460
-	fgets(str+16, 128, stdin);
-	str+140+16 = 0x0;
-	for (int i = 0;i<41 && str[i];i++) {
-		username[140+i] = str[i + 16];
-		if (str+16+140+i == 40)
-			break ;
+	fgets(c_1, 128, stdin);
+
+	for (i_2 = 0; i_2 < 41 && c_1[i_2] != '\0' ; i_2 += 1) {
+		username[140 + i_2] = c_1[i_2];
 	}
-	printf(">: Welcome, %s", unknow_var);
+
+	printf(">: Welcome, %s", &username[140]);
 }
 
 void handle_msg()
 {
-	char str[192];
+	int64_t i_6 = 140;
+	int64_t i_5 = 0;
+	int64_t i_4 = 0;
+	int64_t i_3 = 0;
+	int64_t i_2 = 0;
+	int64_t i_1 = 0;	// -52
+	char c_1[140];		// -192
 
-	bzero(str+140, 40);
-	str+180 = 140;
-	set_username(str);
-	set_msg(str);
+	set_username(c_1);
+	set_msg(c_1);
 	puts(">: Msg sent!");
 }
 
