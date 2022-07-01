@@ -7,6 +7,11 @@ level02@OverRide:~$ file level02
 level02: setuid setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xf639d5c443e6ff1c50a0f8393461c0befc329e71, not stripped
 ```
 
+The program read the `.pass` file of the next level. To debug it in gdb, we simply replace it with `tmp/.pass`.
+
+When reading it, the program make checks that the length must be equal to 41.
+
+
 Description simplifier:
 
 Le binaire lit le fichier .pass du level suivant (/home/users/level03/.pass).

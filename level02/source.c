@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    i = (int)fread(buf_2, 1, 29, file);
+    i = (int)fread(buf_2, 1, 41, file);
     buf_2[strcspn(buf_2, "\n")] = 0;
     if (i != 41) {
         fwrite("ERROR: failed to read password file\n", 1, 36, stderr);
