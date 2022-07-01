@@ -7,7 +7,9 @@ level02@OverRide:~$ file level02
 level02: setuid setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xf639d5c443e6ff1c50a0f8393461c0befc329e71, not stripped
 ```
 
-The program read the `.pass` file of the next level. To debug it in gdb, we extract the program to another machine to debug it. We create a file in `home/users/level03`:
+The program read the `.pass` file of the next level. When reading it, the program make checks that the length must be equal to 41.
+
+To debug it in gdb, we extract the program to another machine to debug it. We create a file in `home/users/level03`.
 
 ```bash
 ┌──(vagrant㉿kali)-[~]
