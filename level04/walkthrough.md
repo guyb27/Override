@@ -1,8 +1,12 @@
+# level04
+
+```bash
 RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      FILE
 Partial RELRO   No canary found   NX disabled   No PIE          No RPATH   No RUNPATH   /home/users/level04/level04
 
 level04@OverRide:~$ file level04 
 level04: setuid setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x7386c3c1bbd3e4d8fc85f88744379783bf327fd7, not stripped
+```
 
 Dans le gets, nous ecrasons save eip a partir de 156 characteres:
 => 0x0804875e <+150>:   call   0x80484b0 <gets@plt>

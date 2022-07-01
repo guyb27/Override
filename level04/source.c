@@ -1,3 +1,10 @@
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/ptrace.h>
+#include <sys/user.h>
+#include <unistd.h>
+
 int main()
 {
 	int status;
@@ -7,15 +14,15 @@ int main()
 
 	pid = fork();
 	bzero(str, 32);
-	if (!ret_fork)//child
+	if (!pid)	// child
 	{
-		prctl(1, 1);//Pas utile dans notre cas, le fils recoit un SIGHUP si le pere meurt.
-		ptrace(PTRACE_TRACEME, 0, 0, 0);Permet de se faire "tracer" par le pere, une espece de controle parental
+		prctl(1, 1);	// Pas utile dans notre cas, le fils recoit un SIGHUP si le pere meurt.
+		ptrace(PT_TRACE_ME, 0, 0, 0);	// Permet de se faire "tracer" par le pere, une espece de controle parental
 		puts("Give me some shellcode, k");
 		gets(str);
 		return (0);
 	}
-	else//parent
+	else	// parent
 	{
 		while (ret_ptrace != 0xb)
 		{
@@ -25,10 +32,10 @@ int main()
             			puts("child is exiting...");
          	   		return 0;
         		}
-			ret_ptrace = ptrace(PTRACE_PEEKUSER, ret_fork, 44, 0);//Retourn 0xb si on utilise une fonction exec() dans un shellcode
+			ret_ptrace = ptrace(PTRACE_PEEKUSER, pid, 44, 0);	// Retourne 0xb si on utilise une fonction exec() dans un shellcode
 		}
 	}
 	puts("no exec() for you");
-	kill(ret_fork, 9);
+	kill(pid, 9);
 	return 0;
 }
