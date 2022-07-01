@@ -7,13 +7,13 @@ We can see that program takes an input and XOR each byte with 32 if it is betwee
 Starting program: /home/users/level05/level05 
 
 AAAAAAAAAAA
-=> 0x0804847a <+54>:	mov    DWORD PTR [esp+0x8c],0x0
 Breakpoint 1, 0x0804847a in main ()
+=> 0x0804847a <+54>:	mov    DWORD PTR [esp+0x8c],0x0
 (gdb) x/s $eax
 0xffffd4b8:	 "AAAAAAAA\n"
 
-=> 0x08048507 <+195>:	call   0x8048340 <printf@plt>
 Breakpoint 2, 0x08048507 in main ()
+=> 0x08048507 <+195>:	call   0x8048340 <printf@plt>
 (gdb) x/wx $esp
 0xffffd490:	0xffffd4b8
 (gdb) x/s 0xffffd4b8
