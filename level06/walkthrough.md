@@ -43,7 +43,9 @@ At the end, we can see that it checks the result of the operation with the secon
    0x08048866 <+286>:   cmp    eax,DWORD PTR [ebp-0x10]
 ```
 
-We try to debug by bypassing the `ptrace` to see what the result of the operation:
+We try to debug by bypassing the `ptrace` to see what is the result of the operation.
+
+We fill the first buffer with 32 bytes and fill the second with a dummy string :
 
 ```gdb
 (gdb) b *auth+109
@@ -60,6 +62,11 @@ Starting program: /home/users/level06/level06 <<< $(python -c "print 'A' * 31 + 
 ***********************************
 
 Breakpoint 1, 0x080487b5 in auth ()
+```
+
+At this point, we can jump the `ptrace` and see the xored variable corresponding to our buffer:
+
+```gdb
 (gdb) jump *auth+165
 Continuing at 0x80487ed.
 

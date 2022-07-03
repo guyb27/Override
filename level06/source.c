@@ -59,7 +59,7 @@ int main() {
     printf("-> Enter Serial: ");
     scanf("%u", &buf_3, stdin);
 
-    if (auth(buf_2, buf_3)) {
+    if (auth(buf_2, buf_3) != 0) {
         return(1);
     }
 
